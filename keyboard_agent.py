@@ -61,7 +61,7 @@ def rollout(env):
 if __name__ == '__main__':
 
   parser = argparse.ArgumentParser()
-  parser.add_argument("-s", "--scene_dump", type=str, default="./data/bedroom_04.h5",
+  parser.add_argument("-s", "--scene_dump", type=str, default="/data/bedroom_04.h5",
                       help="path to a hdf5 scene dump file")
   args = parser.parse_args()
 
