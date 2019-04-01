@@ -30,19 +30,20 @@ class ActorCriticNetwork(object):
 
       # policy entropy
       entropy = -tf.reduce_sum(self.pi[scope_key] * log_pi, axis=1)
+      self.entropy = entropy
 
       # policy loss (output)
-      policy_loss = - tf.reduce_sum(tf.reduce_sum(tf.multiply(log_pi, self.a), axis=1) * self.td + entropy * entropy_beta)
+      self.policy_loss = - tf.reduce_sum(tf.reduce_sum(tf.multiply(log_pi, self.a), axis=1) * self.td + entropy * entropy_beta)
 
       # R (input for value)
       self.r = tf.placeholder("float", [None])
 
       # value loss (output)
       # learning rate for critic is half of actor's
-      value_loss = 0.5 * tf.nn.l2_loss(self.r - self.v[scope_key])
+      self.value_loss = 0.5 * tf.nn.l2_loss(self.r - self.v[scope_key])
 
       # gradienet of policy and value are summed up
-      self.total_loss = policy_loss + value_loss
+      self.total_loss = self.policy_loss + self.value_loss
 
   def run_policy_and_value(self, sess, s_t, task):
     raise NotImplementedError()

@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 import random
 import sys
+import os
 
 from network import ActorCriticFFNetwork
 from training_thread import A3CTrainingThread
@@ -38,6 +39,7 @@ if __name__ == '__main__':
 
   saver = tf.train.Saver()
   checkpoint = tf.train.get_checkpoint_state(CHECKPOINT_DIR)
+  checkpoint.model_checkpoint_path = os.path.normpath(os.path.join(__file__,'..\\checkpoints', 'checkpoint-10000085'))
 
   if checkpoint and checkpoint.model_checkpoint_path:
     saver.restore(sess, checkpoint.model_checkpoint_path)
@@ -66,4 +68,4 @@ if __name__ == '__main__':
   
   print('Weights exported')
   print('Saving')
-  pickle.dump(model, open( "/model/weights.p", "wb" ))
+  pickle.dump(model, open( "weights.p", "wb" ))

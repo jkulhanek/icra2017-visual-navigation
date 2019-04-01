@@ -21,7 +21,7 @@ class THORDiscreteEnvironment(object):
     self.n_feat_per_locaiton = config.get('n_feat_per_locaiton', 1) # 1 for no sampling
     self.terminal_state_id   = config.get('terminal_state_id', 0)
 
-    self.h5_file_path = config.get('h5_file_path', '/data/%s.h5'%self.scene_name)
+    self.h5_file_path = config.get('h5_file_path', '~/.visual_navigation/scenes/%s.h5'%self.scene_name)
     self.h5_file      = h5py.File(self.h5_file_path, 'r')
 
     self.locations   = self.h5_file['location'][()]
