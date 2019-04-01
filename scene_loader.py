@@ -5,6 +5,7 @@ import json
 import numpy as np
 import random
 import skimage.io
+import os
 from skimage.transform import resize
 from constants import ACTION_SIZE
 from constants import SCREEN_WIDTH
@@ -21,11 +22,11 @@ class THORDiscreteEnvironment(object):
     self.n_feat_per_locaiton = config.get('n_feat_per_locaiton', 1) # 1 for no sampling
     self.terminal_state_id   = config.get('terminal_state_id', 0)
 
-    self.h5_file_path = config.get('h5_file_path', '~/.visual_navigation/scenes/%s.h5'%self.scene_name)
+    self.h5_file_path = config.get('h5_file_path', os.path.expanduser('~/.visual_navigation/scenes/%s.h5'%self.scene_name))
     self.h5_file      = h5py.File(self.h5_file_path, 'r')
 
     self.locations   = self.h5_file['location'][()]
-    self.rotations   = self.h5_file['rotation'][()]
+    #self.rotations   = self.h5_file['rotation'][()]
     self.n_locations = self.locations.shape[0]
 
     self.terminals = np.zeros(self.n_locations)
@@ -94,8 +95,7 @@ class THORDiscreteEnvironment(object):
   # private methods
 
   def _tiled_state(self, state_id):
-    k = random.randrange(self.n_feat_per_locaiton)
-    f = self.h5_file['resnet_feature'][state_id][k][:,np.newaxis]
+    f = self.h5_file['resnet_feature'][state_id][:,np.newaxis]
     return np.tile(f, (1, self.history_length))
 
   def _reward(self, terminal, collided):
@@ -123,8 +123,8 @@ class THORDiscreteEnvironment(object):
   @property
   def state(self):
     # read from hdf5 cache
-    k = random.randrange(self.n_feat_per_locaiton)
-    return self.h5_file['resnet_feature'][self.current_state_id][k][:,np.newaxis]
+    # k = random.randrange(self.n_feat_per_locaiton)
+    return self.h5_file['resnet_feature'][self.current_state_id][:,np.newaxis]
 
   @property
   def target(self):
@@ -138,9 +138,9 @@ class THORDiscreteEnvironment(object):
   def z(self):
     return self.locations[self.current_state_id][1]
 
-  @property
-  def r(self):
-    return self.rotations[self.current_state_id]
+  #@property
+  #def r(self):
+  #  return self.rotations[self.current_state_id]
 
 if __name__ == "__main__":
   scene_name = 'bedroom_04'

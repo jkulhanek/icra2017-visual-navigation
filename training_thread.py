@@ -24,6 +24,7 @@ class A3CTrainingThread(object):
                grad_applier,
                max_global_time_step,
                device,
+               get_logger,
                network_scope="network",
                scene_scope="scene",
                task_scope="task"):
@@ -69,6 +70,7 @@ class A3CTrainingThread(object):
     self.episode_reward = 0
     self.episode_length = 0
     self.episode_max_q = -np.inf
+    self.get_logger = get_logger
 
   def _local_var_name(self, var):
     return '/'.join(var.name.split('/')[1:])
@@ -182,6 +184,10 @@ class A3CTrainingThread(object):
 
         self._record_score(sess, summary_writer, summary_op, summary_placeholders,
                            summary_values, global_t)
+
+        with self.get_logger() as logger:
+          logger.record(global_t).scalar('reward', self.episode_reward).scalar('episode_length', self.episode_length).flush()
+          
         self.episode_reward = 0
         self.episode_length = 0
         self.episode_max_q = -np.inf

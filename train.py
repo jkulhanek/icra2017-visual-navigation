@@ -28,6 +28,7 @@ from constants import GRAD_NORM_CLIP
 from constants import USE_GPU
 from constants import TASK_TYPE
 from constants import TASK_LIST
+from deeprl import get_logger, save_path
 
 if __name__ == '__main__':
 
@@ -75,6 +76,7 @@ if __name__ == '__main__':
     training_thread = A3CTrainingThread(i, global_network, initial_learning_rate,
                                         learning_rate_input,
                                         grad_applier, MAX_TIME_STEP,
+                                        get_logger = get_logger,
                                         device = device,
                                         network_scope = "thread-%d"%(i+1),
                                         scene_scope = scene,
@@ -123,7 +125,7 @@ if __name__ == '__main__':
   # saver = tf.train.Saver(max_to_keep=10, var_list=global_network.get_vars())
   saver = tf.train.Saver(max_to_keep=10)
 
-  checkpoint = tf.train.get_checkpoint_state(CHECKPOINT_DIR)
+  '''checkpoint = tf.train.get_checkpoint_state(CHECKPOINT_DIR)
   if checkpoint and checkpoint.model_checkpoint_path:
     saver.restore(sess, checkpoint.model_checkpoint_path)
     print("checkpoint loaded: {}".format(checkpoint.model_checkpoint_path))
@@ -132,13 +134,14 @@ if __name__ == '__main__':
     global_t = int(tokens[1])
     print(">>> global step set: {}".format(global_t))
   else:
-    print("Could not find old checkpoint")
+    print("Could not find old checkpoint")'''
 
 
   def train_function(parallel_index):
     global global_t
     training_thread = training_threads[parallel_index]
     last_global_t = 0
+    last_metrics_t = 0
 
     scene, task = branches[parallel_index % NUM_TASKS]
     key = scene + "-" + task
@@ -148,6 +151,12 @@ if __name__ == '__main__':
                                               summary_op[key], summary_placeholders[key])
       global_t += diff_global_t
       # periodically save checkpoints to disk
+      if parallel_index == 0 and global_t - last_metrics_t > 20000:
+        with get_logger() as logger:
+          logger.save(save_path)
+        last_metrics_t = global_t
+
+
       if parallel_index == 0 and global_t - last_global_t > 1000000:
         print('Save checkpoint at timestamp %d' % global_t)
         saver.save(sess, CHECKPOINT_DIR + '/' + 'checkpoint', global_step = global_t)
@@ -177,4 +186,6 @@ if __name__ == '__main__':
 
   print('Now saving data. Please wait.')
   saver.save(sess, CHECKPOINT_DIR + '/' + 'checkpoint', global_step = global_t)
+  with get_logger() as logger:
+    logger.save(save_path)
   summary_writer.close()
