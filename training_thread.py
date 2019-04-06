@@ -157,7 +157,7 @@ class A3CTrainingThread(object):
 
       # ad-hoc reward for navigation
       reward = 10.0 if terminal else -0.01
-      if self.episode_length > 5e3: terminal = True
+      if self.episode_length > 900: terminal = True
 
       self.episode_reward += reward
       self.episode_length += 1
